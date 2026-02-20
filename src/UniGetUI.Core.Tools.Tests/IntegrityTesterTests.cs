@@ -50,4 +50,40 @@ public class IntegrityTesterTests
             }
         }
     }
+
+    [Fact]
+    public void CheckIntegrity_IgnoresNestedPublishEntries()
+    {
+        string exeDir = CoreData.UniGetUIExecutableDirectory;
+        string integrityTreePath = Path.Join(exeDir, "IntegrityTree.json");
+        string publishRelativePath = "publish/UniGetUI.exe";
+
+        bool hadOriginalTree = File.Exists(integrityTreePath);
+        string? originalTree = hadOriginalTree ? File.ReadAllText(integrityTreePath) : null;
+
+        try
+        {
+            Dictionary<string, string> tree = new()
+            {
+                [publishRelativePath] = "00000000000000000000000000000000"
+            };
+            File.WriteAllText(integrityTreePath, JsonSerializer.Serialize(tree));
+
+            var result = IntegrityTester.CheckIntegrity(allowRetry: false);
+            Assert.True(result.Passed);
+            Assert.Empty(result.MissingFiles);
+            Assert.Empty(result.CorruptedFiles);
+        }
+        finally
+        {
+            if (hadOriginalTree)
+            {
+                File.WriteAllText(integrityTreePath, originalTree!);
+            }
+            else if (File.Exists(integrityTreePath))
+            {
+                File.Delete(integrityTreePath);
+            }
+        }
+    }
 }

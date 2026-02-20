@@ -11,7 +11,8 @@ public static class IntegrityTester
     private static bool ShouldIgnorePath(string relativePath)
     {
         string normalized = relativePath.Replace('\\', '/');
-        return normalized.StartsWith("Settings/", StringComparison.OrdinalIgnoreCase);
+        return normalized.StartsWith("Settings/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("publish/", StringComparison.OrdinalIgnoreCase);
     }
 
     public class MismatchedHash
