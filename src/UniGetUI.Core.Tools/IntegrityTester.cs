@@ -8,6 +8,12 @@ namespace UniGetUI.Core.Tools;
 
 public static class IntegrityTester
 {
+    private static bool ShouldIgnorePath(string relativePath)
+    {
+        string normalized = relativePath.Replace('\\', '/');
+        return normalized.StartsWith("Settings/", StringComparison.OrdinalIgnoreCase);
+    }
+
     public class MismatchedHash
     {
         public string Got;
@@ -89,6 +95,11 @@ public static class IntegrityTester
 
         foreach (var (file, expectedHash) in data)
         {
+            if (ShouldIgnorePath(file))
+            {
+                continue;
+            }
+
             var fullPath = Path.Join(CoreData.UniGetUIExecutableDirectory, file);
             if (!File.Exists(fullPath))
             {

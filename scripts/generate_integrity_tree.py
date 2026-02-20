@@ -24,6 +24,9 @@ def main() -> int:
 
             file_path = os.path.join(subdir, filename)
             relative_path = os.path.relpath(file_path, root_dir).replace("\\", "/")
+            # Portable mode keeps user data under ./Settings; exclude volatile runtime files.
+            if relative_path.lower().startswith("settings/"):
+                continue
             if not min_output:
                 print(f" - Computing MD5SUM of {relative_path}...")
 
