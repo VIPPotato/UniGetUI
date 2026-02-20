@@ -219,13 +219,29 @@ namespace UniGetUI.Core.Data
         {
             get
             {
-                string? dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                if (dir is not null)
+                string? processPath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
+                string? processDir = Path.GetDirectoryName(processPath);
+                string processName = Path.GetFileName(processPath ?? "");
+
+                if (!string.IsNullOrWhiteSpace(processDir) && !string.Equals(processName, "dotnet.exe", StringComparison.OrdinalIgnoreCase))
                 {
-                    return dir;
+                    return processDir;
                 }
 
-                Logger.Error("System.Reflection.Assembly.GetExecutingAssembly().Location returned an empty path");
+                string? assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string? assemblyDir = Path.GetDirectoryName(assemblyLocation);
+                if (!string.IsNullOrWhiteSpace(assemblyDir))
+                {
+                    return assemblyDir;
+                }
+
+                if (!string.IsNullOrWhiteSpace(processDir))
+                {
+                    Logger.Warn("Falling back to process executable directory for data path resolution");
+                    return processDir;
+                }
+
+                Logger.Error("Could not resolve UniGetUI executable directory from process or assembly location");
 
                 return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UniGetUI");
             }
@@ -238,13 +254,23 @@ namespace UniGetUI.Core.Data
         {
             get
             {
-                string? filename = Process.GetCurrentProcess().MainModule?.FileName;
-                if (filename is not null)
+                string? processPath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrWhiteSpace(processPath))
                 {
-                    return filename.Replace(".dll", ".exe");
+                    return processPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                        ? processPath.Replace(".dll", ".exe", StringComparison.OrdinalIgnoreCase)
+                        : processPath;
                 }
 
-                Logger.Error("System.Reflection.Assembly.GetExecutingAssembly().Location returned an empty path");
+                string? assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                if (!string.IsNullOrWhiteSpace(assemblyLocation))
+                {
+                    return assemblyLocation.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                        ? assemblyLocation.Replace(".dll", ".exe", StringComparison.OrdinalIgnoreCase)
+                        : assemblyLocation;
+                }
+
+                Logger.Error("Could not resolve UniGetUI executable file from process or assembly location");
 
                 return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UniGetUI", "UniGetUI.exe");
             }

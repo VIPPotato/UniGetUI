@@ -29,5 +29,20 @@
             Assert.True(Directory.Exists(CoreData.UniGetUIExecutableDirectory), "Directory where the executable is located does not exist");
             Assert.True(File.Exists(CoreData.UniGetUIExecutableFile), "The executable file does not exist");
         }
+
+        [Fact]
+        public void ExecutablePathAndDirectoryAreConsistent()
+        {
+            string executableDirectory = CoreData.UniGetUIExecutableDirectory;
+            string? parentDirectory = Path.GetDirectoryName(CoreData.UniGetUIExecutableFile);
+
+            Assert.False(string.IsNullOrWhiteSpace(parentDirectory), "Executable parent directory should be resolvable");
+            Assert.True(
+                string.Equals(
+                    Path.GetFullPath(executableDirectory).TrimEnd('\\'),
+                    Path.GetFullPath(parentDirectory!).TrimEnd('\\'),
+                    StringComparison.OrdinalIgnoreCase),
+                "Executable directory and executable parent directory should match");
+        }
     }
 }

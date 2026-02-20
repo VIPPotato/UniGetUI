@@ -51,7 +51,7 @@ public static class IntegrityTester
         string integrityTreePath = Path.Join(CoreData.UniGetUIExecutableDirectory, "IntegrityTree.json");
         if (!File.Exists(integrityTreePath))
         {
-            Logger.Error("/IntegrityTree.json does not exist, integrity check will not be performed!");
+            Logger.Error($"Integrity tree does not exist at {integrityTreePath}, integrity check will not be performed!");
             return new()
             {
                 Passed = false,

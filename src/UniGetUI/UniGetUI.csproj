@@ -33,11 +33,17 @@
     </Target>
 
   <Target Name="PostBuildGenerateIntegrityTree" AfterTargets="PostBuildEvent">
-    <Exec Command="py -3 ../../scripts/generate_integrity_tree.py $(OutputPath) --min-output" />
+    <PropertyGroup>
+      <_IntegrityOutputPath>$([System.String]::Copy('$(OutputPath)').TrimEnd('\'))</_IntegrityOutputPath>
+    </PropertyGroup>
+    <Exec Command="py -3 ../../scripts/generate_integrity_tree.py &quot;$(_IntegrityOutputPath)&quot; --min-output" />
   </Target>
 
   <Target Name="PostPublishGenerateIntegrityTree" AfterTargets="Publish">
-    <Exec Command="py -3 ../../scripts/generate_integrity_tree.py $(PublishDir) --min-output" />
+    <PropertyGroup>
+      <_IntegrityPublishDir>$([System.String]::Copy('$(PublishDir)').TrimEnd('\'))</_IntegrityPublishDir>
+    </PropertyGroup>
+    <Exec Command="py -3 ../../scripts/generate_integrity_tree.py &quot;$(_IntegrityPublishDir)&quot; --min-output" />
   </Target>
 
     <ItemGroup>
